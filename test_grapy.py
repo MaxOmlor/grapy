@@ -68,7 +68,46 @@ class TestGrapy(unittest.TestCase):
         self.assertArrayEqual(result.verts, expected.verts)
         self.assertArrayEqual(result.edges, expected.edges)
 
-
+    def test_sub_1v(self):
+        g = gp.from_edges([[1,2], [2,3]])
+        result = g-3
+        expected = gp.from_edges([[1,2]])
+        self.assertArrayEqual(result.verts, expected.verts)
+        self.assertArrayEqual(result.edges, expected.edges)
+    def test_sub_vs(self):
+        g = gp.from_edges([[1,2], [2,3], [3,4], [4,5], [5,6]])
+        result = g-[3,4]
+        expected = gp.from_edges([[1,2], [5,6]])
+        self.assertArrayEqual(result.verts, expected.verts)
+        self.assertArrayEqual(result.edges, expected.edges)
+    def test_sub_1e(self):
+        g = gp.from_edges([[1,2], [2,3], [3,1]])
+        result1 = g-[[1,3]]
+        result2 = g-[[3,1]]
+        expected = gp.from_edges([[1,2], [2,3]])
+        self.assertArrayEqual(result1.verts, expected.verts)
+        self.assertArrayEqual(result1.edges, expected.edges)
+        self.assertArrayEqual(result2.verts, expected.verts)
+        self.assertArrayEqual(result2.edges, expected.edges)
+    def test_sub_es(self):
+        g = gp.from_edges([[1,2], [2,3], [3,4], [4,5]])
+        result1 = g-[[2,3], [3,4]]
+        result2 = g-[[2,3], [4,3]]
+        expected = gp.graph([1,2,3,4,5], [[1,2], [4,5]])
+        self.assertArrayEqual(result1.verts, expected.verts)
+        self.assertArrayEqual(result1.edges, expected.edges)
+        self.assertArrayEqual(result2.verts, expected.verts)
+        self.assertArrayEqual(result2.edges, expected.edges)
+    def test_sub_g(self):
+        g1 = gp.from_edges([[4,5], [5,6], [6,1]])
+        g2 = gp.from_edges([[5,4], [6,5], [1,6]])
+        result1 = TestGrapy.double_tris - g1
+        result2 = TestGrapy.double_tris - g2
+        expected = gp.from_edges([[1,2], [2,3], [3,1]])
+        self.assertArrayEqual(result1.verts, expected.verts)
+        self.assertArrayEqual(result1.edges, expected.edges)
+        self.assertArrayEqual(result2.verts, expected.verts)
+        self.assertArrayEqual(result2.edges, expected.edges)
     
     def assertArrayEqual(self, first, second):
         self.assertTrue(np.array_equal(first, second))
