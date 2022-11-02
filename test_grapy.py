@@ -12,3 +12,7 @@ class TestGrapy(unittest.TestCase):
 
     def test_len(self):
         self.assertEqual(len(TestGrapy.double_tris), 6)
+
+    def test_get_edges(self):
+        result = TestGrapy.double_tris.get_edges([1, 2, 3], [4, 5, 6])
+        self.assertTrue(np.array_equal(result, np.array([[3,4],[6,1]])))
