@@ -60,6 +60,23 @@ class grapy():
             
             return grapy.graph(verts, self.get_edges(verts, verts))
 
+    class edges():
+        @classmethod
+        def contains_edges(cls, edges1, edges2):
+            if edges2.shape == (2,):
+                edges2 = edges2[np.newaxis]
+
+            edges2_fliped = np.flip(edges2, axis=1)
+            edges1_expanded = np.expand_dims(edges1, 1)
+
+            comparsion1 = edges1_expanded == edges2
+            comparsion1 = comparsion1.all(axis=2)
+            comparsion2 = edges1_expanded == edges2_fliped
+            comparsion2 = comparsion2.all(axis=2)
+            comparsion = comparsion1 | comparsion2
+            return comparsion.any(axis=0)
+
+
     @classmethod
     def from_edges(cls, edges: np.ndarray) -> graph:
         verts = np.unique(edges)
@@ -92,8 +109,7 @@ class grapy():
         neighb1 = g.edges[mask1][:,1]
         neighb2 = g.edges[mask2][:,0]
 
-        #return np.append(neighb1, neighb2)
-        return np.unique([neighb1, neighb2])
+        return np.unique(np.append(neighb1, neighb2))
 
     @classmethod
     def contains(cls, g: graph, other: int|np.ndarray|graph) -> bool|np.ndarray:
@@ -109,13 +125,13 @@ class grapy():
             other = np.array(other)
         # one edge
         if type(other) is np.ndarray and other.shape == (2,):
-            return other in g.edges
+            return cls.contains_edges(g, other)
         # multiple verts
         if type(other) is np.ndarray and len(other.shape) == 1:
             return np_extensions.contains_vec(g.verts, other).all()
         # multiple edges
         if type(other) is np.ndarray and len(other.shape) == 2:
-            return np_extensions.contains_vec(g.edges, other).all()
+            return cls.contains_edges(g, other)
 
     @classmethod
     def contains_verts(cls, g: graph, verts: int|np.ndarray) -> bool|np.ndarray:
@@ -125,6 +141,4 @@ class grapy():
 
     @classmethod
     def contains_edges(cls, g: graph, edges: np.ndarray) -> bool|np.ndarray:
-        if edges.shape == (2,):
-            return edges in g.edges
-        return np_extensions.contains_vec(g.edges, edges).all()
+        return cls.edges.contains_edges(g.edges, edges).all()
