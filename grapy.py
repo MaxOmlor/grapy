@@ -1,7 +1,7 @@
 from __future__ import annotations
 import numpy as np
 
-class np_extensions():
+class numpy_extensions():
     @classmethod
     def contains_vec(cls, a: np.ndarray, b: np.ndarray, axis=1) -> np.ndarray:
         if type(a) is not np.ndarray:
@@ -56,7 +56,7 @@ class grapy():
             return grapy.contains_edges(self, edges)
 
         def __getitem__(self, verts) -> grapy.graph:
-            if not np.all(np_extensions.contains_vec(self.verts, verts)):
+            if not np.all(numpy_extensions.contains_vec(self.verts, verts)):
                 raise ValueError(f'verts {verts} not in {self.verts}')
             
             return grapy.graph(verts, self.get_edges(verts, verts))
@@ -97,13 +97,13 @@ class grapy():
         if type(verts2) is int:
             verts = np.array([verts2])
 
-        mask = (np_extensions.contains_vec(verts, g.edges[:,0])
-            | np_extensions.contains_vec(verts, g.edges[:, 1])
+        mask = (numpy_extensions.contains_vec(verts, g.edges[:,0])
+            | numpy_extensions.contains_vec(verts, g.edges[:, 1])
             if verts2 is None else
-            (np_extensions.contains_vec(verts, g.edges[:,0])
-            & np_extensions.contains_vec(verts2, g.edges[:,1]))
-            | (np_extensions.contains_vec(verts, g.edges[:, 1]))
-            & np_extensions.contains_vec(verts2, g.edges[:,0]))
+            (numpy_extensions.contains_vec(verts, g.edges[:,0])
+            & numpy_extensions.contains_vec(verts2, g.edges[:,1]))
+            | (numpy_extensions.contains_vec(verts, g.edges[:, 1]))
+            & numpy_extensions.contains_vec(verts2, g.edges[:,0]))
         
         return g.edges[mask]
         
@@ -112,8 +112,8 @@ class grapy():
         if type(verts) is int:
             verts = np.array([verts])
 
-        mask1 = np_extensions.contains_vec(verts, g.edges[:,0])
-        mask2 = np_extensions.contains_vec(verts, g.edges[:,1])
+        mask1 = numpy_extensions.contains_vec(verts, g.edges[:,0])
+        mask2 = numpy_extensions.contains_vec(verts, g.edges[:,1])
         neighb1 = g.edges[mask1][:,1]
         neighb2 = g.edges[mask2][:,0]
 
@@ -126,8 +126,8 @@ class grapy():
             return other in g.verts
         # ggraph
         if type(other) is grapy.graph:
-            return (np_extensions.contains_vec(g.verts, other.verts).all()
-                and np_extensions.contains_vec(g.edges, other.edges).all())
+            return (numpy_extensions.contains_vec(g.verts, other.verts).all()
+                and numpy_extensions.contains_vec(g.edges, other.edges).all())
 
         if type(other) is not np.ndarray:
             other = np.array(other)
@@ -137,7 +137,7 @@ class grapy():
         
         # multiple verts
         if len(other.shape) == 1:
-            return np_extensions.contains_vec(g.verts, other).all()
+            return numpy_extensions.contains_vec(g.verts, other).all()
         # multiple edges
         if len(other.shape) == 2:
             return cls.contains_edges(g, other)
@@ -146,7 +146,7 @@ class grapy():
     def contains_verts(cls, g: graph, verts: int|np.ndarray) -> bool|np.ndarray:
         if type(verts) is int:
             return verts in g.verts
-        return np_extensions.contains_vec(g.verts, verts).all()
+        return numpy_extensions.contains_vec(g.verts, verts).all()
 
     @classmethod
     def contains_edges(cls, g: graph, edges: np.ndarray) -> bool|np.ndarray:
@@ -181,6 +181,6 @@ class grapy():
         if edges.shape == (2,):
             edges = edges[np.newaxis]
         
-        remaining_edges = np_extensions.setdiff2d(g.edges, edges)
-        remaining_edges = np_extensions.setdiff2d(remaining_edges, np.flip(edges, axis=1))
+        remaining_edges = numpy_extensions.setdiff2d(g.edges, edges)
+        remaining_edges = numpy_extensions.setdiff2d(remaining_edges, np.flip(edges, axis=1))
         return cls.graph(np.copy(g.verts), remaining_edges)
