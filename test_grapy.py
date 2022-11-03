@@ -11,23 +11,24 @@ class TestGrapy(unittest.TestCase):
     double_tris = gp.from_edges([[1,2], [2,3], [3,1], [3,4], [4,5], [5,6], [6,4], [6,1]])
 
     def test_from_edges(self):
-        edges = [[1,2], [2,3]]
+        edges = [[1,2], [2,3], [3,2]]
+        expected_edges = [[1,2], [2,3]]
         g = gp.from_edges(edges)
         self.assertArrayEqual(g.verts, np.array([1,2,3]))
-        self.assertArrayEqual(g.edges, np.array(edges))
+        self.assertArrayEqual(g.edges, np.array(expected_edges))
 
     def test_len(self):
         self.assertEqual(len(TestGrapy.double_tris), 6)
 
     def test_get_edges_1v(self):
         result = TestGrapy.double_tris.get_edges(1)
-        self.assertArrayEqual(result, np.array([[1,2],[3,1],[6,1]]))
+        self.assertArrayEqual(result, np.array([[1,2],[1,3],[1,6]]))
     def test_get_edges_vs(self):
         result = TestGrapy.double_tris.get_edges([1,2])
-        self.assertArrayEqual(result, np.array([[1,2],[2,3],[3,1],[6,1]]))
+        self.assertArrayEqual(result, np.array([[1,2],[1,3],[1,6],[2,3]]))
     def test_get_edges_from_to_vs(self):
         result = TestGrapy.double_tris.get_edges([1, 2, 3], [4, 5, 6])
-        self.assertArrayEqual(result, np.array([[3,4],[6,1]]))
+        self.assertArrayEqual(result, np.array([[1,6],[3,4]]))
 
     def test_neighb_1v(self):
         result = TestGrapy.double_tris.neighb(1)
