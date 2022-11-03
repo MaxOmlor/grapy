@@ -14,10 +14,6 @@ class numpy_extensions():
             comparsion = comparsion.all(axis=i)
         return comparsion.any(axis=axis)
     
-    @classmethod
-    def setdiff2d(cls, a: np.ndarray, b: np.ndarray) -> np.ndarray:
-        dims = np.maximum(a.max(0), b.max(0)) + 1
-        return a[~np.in1d(np.ravel_multi_index(a.T,dims), np.ravel_multi_index(b.T,dims))]
 
 class grapy():
     class graph():
@@ -29,9 +25,9 @@ class grapy():
 
             if len(edges.shape) != 2 or edges.shape[1] != 2:
                 raise ValueError(f'edges.shape must be (n,2) not {edges.shape}')
-                
+
             self.verts = verts
-            self.edges = edges
+            self.edges = grapy.edges.rm_dupes(edges)
 
             # predicates
             # - start and end of every edges must be in verts
@@ -95,6 +91,14 @@ class grapy():
             comparsion = comparsion1 | comparsion2
             return comparsion.any(axis=0)
 
+        @classmethod
+        def setdiff(cls, a: np.ndarray, b: np.ndarray) -> np.ndarray:
+            dims = np.maximum(a.max(0), b.max(0)) + 1
+            return a[~np.in1d(np.ravel_multi_index(a.T,dims), np.ravel_multi_index(b.T,dims))]
+
+        @classmethod
+        def rm_dupes(cls, edges):
+            return np.unique(np.sort(edges, axis=1), axis=0)
 
     @classmethod
     def from_edges(cls, edges: np.ndarray) -> graph:
@@ -188,8 +192,8 @@ class grapy():
         if edges.shape == (2,):
             edges = edges[np.newaxis]
         
-        remaining_edges = numpy_extensions.setdiff2d(g.edges, edges)
-        remaining_edges = numpy_extensions.setdiff2d(remaining_edges, np.flip(edges, axis=1))
+        remaining_edges = cls.edges.setdiff(g.edges, edges)
+        remaining_edges = cls.edges.setdiff(remaining_edges, np.flip(edges, axis=1))
         return cls.graph(np.copy(g.verts), remaining_edges)
 
     @classmethod
@@ -221,6 +225,7 @@ class grapy():
             edges = edges[np.newaxis]
         if edges.flatten() not in g:
             raise ValueError('all starts and ends of edges must be in g.verts')
+        edges = grapy.edges.rm_dupes(edges)
 
         united_edges = np.unique(np.append(g.edges, edges, axis=0), axis=0)
         return cls.graph(g.verts.copy(), united_edges)
