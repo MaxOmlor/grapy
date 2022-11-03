@@ -26,6 +26,9 @@ class grapy():
                 verts = np.array(verts)
             if type(edges) is not np.ndarray:
                 edges = np.array(edges)
+
+            if len(edges.shape) != 2 or edges.shape[1] != 2:
+                raise ValueError(f'edges.shape must be (n,2) not {edges.shape}')
                 
             self.verts = verts
             self.edges = edges
@@ -67,6 +70,14 @@ class grapy():
             return grapy.sub_verts(self, verts)
         def sub_edges(self, edges) -> grapy.graph:
             return grapy.sub_edges(self, edges)
+
+        def __add__(self, other: int|np.ndarray|grapy.graph) -> grapy.graph:
+            return grapy.add(self, other)
+        def add_verts(self, verts: int|np.ndarray) -> grapy.graph:
+            return grapy.add_verts(self, verts)
+        def add_edges(self, edges: np.ndarray) -> grapy.graph:
+            return grapy.add_edges(self, edges)
+        
 
     class edges():
         @classmethod
@@ -141,13 +152,11 @@ class grapy():
         # multiple edges
         if len(other.shape) == 2:
             return cls.contains_edges(g, other)
-
     @classmethod
     def contains_verts(cls, g: graph, verts: int|np.ndarray) -> bool|np.ndarray:
         if type(verts) is int:
             return verts in g.verts
         return numpy_extensions.contains_vec(g.verts, verts).all()
-
     @classmethod
     def contains_edges(cls, g: graph, edges: np.ndarray) -> bool|np.ndarray:
         return cls.edges.contains_edges(g.edges, edges).all()
@@ -167,7 +176,6 @@ class grapy():
             return cls.sub_verts(g, other)
         if len(other.shape) == 2:
             return cls.sub_edges(g, other)
-
     @classmethod
     def sub_verts(cls, g: graph, verts: int|np.ndarray) -> graph:
         if type(verts) is int:
@@ -175,7 +183,6 @@ class grapy():
         
         remaining_verts = np.setdiff1d(g.verts, verts)
         return g[remaining_verts]
-
     @classmethod
     def sub_edges(cls, g: graph, edges: np.ndarray) -> graph:
         if edges.shape == (2,):
@@ -184,3 +191,36 @@ class grapy():
         remaining_edges = numpy_extensions.setdiff2d(g.edges, edges)
         remaining_edges = numpy_extensions.setdiff2d(remaining_edges, np.flip(edges, axis=1))
         return cls.graph(np.copy(g.verts), remaining_edges)
+
+    @classmethod
+    def add(cls, g: graph, other: int|np.ndarray|graph) -> graph:
+        if type(other) is int:
+            return cls.add_verts(g, other)
+        
+        if type(other) is grapy.graph:
+            new_g = cls.add_verts(g, other.verts)
+            return cls.add_edges(new_g, other.edges)
+
+        if type(other) is not np.ndarray:
+            other = np.array(other)
+
+        if len(other.shape) == 1:
+            return cls.add_verts(g, other)
+        if len(other.shape) == 2:
+            return cls.add_edges(g, other)
+    @classmethod
+    def add_verts(cls, g: graph, verts: int|np.ndarray) -> graph:
+        if type(verts) is int:
+            verts = np.array([verts])
+
+        result_verts = np.union1d(g.verts, verts)
+        return cls.graph(result_verts, np.copy(g.edges))
+    @classmethod
+    def add_edges(cls, g: graph, edges: np.ndarray) -> graph:
+        if edges.shape == (2,):
+            edges = edges[np.newaxis]
+        if edges.flatten() not in g:
+            raise ValueError('all starts and ends of edges must be in g.verts')
+
+        united_edges = np.unique(np.append(g.edges, edges, axis=0), axis=0)
+        return cls.graph(g.verts.copy(), united_edges)
