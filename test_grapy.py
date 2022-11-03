@@ -1,5 +1,5 @@
 import unittest
-from grapy import np_extensions as ne
+from grapy import numpy_extensions as ne
 from grapy import grapy as gp
 import numpy as np
 
@@ -108,5 +108,34 @@ class TestGrapy(unittest.TestCase):
         self.assertArrayEqual(result2.verts, expected.verts)
         self.assertArrayEqual(result2.edges, expected.edges)
     
+    def test_add_1v(self):
+        g = gp.from_edges([[1,2]])
+        result = g + 3
+        expected = gp.graph([1,2,3], [[1,2]])
+        self.assertArrayEqual(result.verts, expected.verts)
+        self.assertArrayEqual(result.edges, expected.edges)
+    def test_add_vs(self):
+        g = gp.from_edges([[1,2]])
+        result = g + [3,4]
+        expected = gp.graph([1,2,3,4], [[1,2]])
+        self.assertArrayEqual(result.verts, expected.verts)
+        self.assertArrayEqual(result.edges, expected.edges)
+    def test_add_es(self):
+        g = gp.from_edges([[1,2], [3,4]])
+        result = g + [[2,3], [4,1]]
+        expected = gp.graph([1,2,3,4], [[1,2], [2,3], [3,4], [4,1]])
+        self.assertArrayEqual(result.verts, expected.verts)
+        self.assertArrayEqual(result.edges, expected.edges)
+    def test_add_g(self):
+        g1 = gp.from_edges([[1,2], [3,4]])
+        g2 = gp.from_edges([[1,2], [2,3], [4,1]])
+        result = g1 + g2
+        expected = gp.graph([1,2,3,4], [[1,2], [2,3], [3,4], [4,1]])
+        self.assertArrayEqual(result.verts, expected.verts)
+        self.assertArrayEqual(result.edges, expected.edges)
+
+
     def assertArrayEqual(self, first, second):
-        self.assertTrue(np.array_equal(first, second))
+        result = np.array_equal(first, second)
+        msg = '' if result else f'arrays are different\n{first}\n!=\n{second}'
+        self.assertTrue(result, msg)
