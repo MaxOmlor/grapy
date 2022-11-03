@@ -41,15 +41,14 @@ class TestGrapy(unittest.TestCase):
     def test_contains_1v_false(self):
         self.assertFalse(7 in TestGrapy.double_tris)
     def test_contains_vs_true(self):
-        self.assertTrue([1,2] in TestGrapy.double_tris)
-        self.assertTrue([2,1] in TestGrapy.double_tris)
+        self.assertTrue([2,5] in TestGrapy.double_tris)
     def test_contains_vs_false(self):
         self.assertFalse([1,5,7] in TestGrapy.double_tris)
-    def test_contains_1e_true(self):
-        self.assertTrue([1,2] in TestGrapy.double_tris)
-        self.assertTrue([2,1] in TestGrapy.double_tris)
-    def test_contains_1e_false(self):
-        self.assertFalse([2,5] in TestGrapy.double_tris)
+    #def test_contains_1e_true(self):
+    #    self.assertTrue([1,2] in TestGrapy.double_tris)
+    #    self.assertTrue([2,1] in TestGrapy.double_tris)
+    #def test_contains_1e_false(self):
+    #    self.assertFalse([2,5] in TestGrapy.double_tris)
     def test_contains_es_true(self):
         self.assertTrue([[1,2],[2,3]] in TestGrapy.double_tris)
         self.assertTrue([[1,2],[3,2]] in TestGrapy.double_tris)
@@ -99,8 +98,8 @@ class TestGrapy(unittest.TestCase):
         self.assertArrayEqual(result2.verts, expected.verts)
         self.assertArrayEqual(result2.edges, expected.edges)
     def test_sub_g(self):
-        g1 = gp.from_edges([[4,5], [5,6], [6,1]])
-        g2 = gp.from_edges([[5,4], [6,5], [1,6]])
+        g1 = gp.from_edges([[4,5], [5,6], [6,4]])
+        g2 = gp.from_edges([[5,4], [6,5], [4,6]])
         result1 = TestGrapy.double_tris - g1
         result2 = TestGrapy.double_tris - g2
         expected = gp.from_edges([[1,2], [2,3], [3,1]])
