@@ -1,7 +1,27 @@
 from __future__ import annotations
 import numpy as np
+from collections.abc import Iterable
+
 
 class numpy_extensions():
+    '''
+    class dict(dict):
+        def __init__(self, iterable=None):
+            if iterable:
+                super().__init__(iterable)
+            else:
+                super().__init__()
+        def __getitem__(self, __key):
+            if isinstance(__key, Iterable) and type(__key) is not np.ndarray:
+                __key = np.array(__key)
+            if type(__key) is np.ndarray:
+                return np.frompyfunc(lambda k: super().__getitem__(k), 1, 1)(__key)
+            return super().__getitem__(__key)
+        def __setitem__(self, __key, __value) -> None:
+            for k, v in zip(__key, __value):
+                super().__setitem__(k, v)
+    '''
+
     @classmethod
     def contains_vec(cls, a: np.ndarray, b: np.ndarray, axis=1) -> np.ndarray:
         if type(a) is not np.ndarray:
@@ -13,6 +33,8 @@ class numpy_extensions():
         for i in range(len(a.shape), axis, -1):
             comparsion = comparsion.all(axis=i)
         return comparsion.any(axis=axis)
+
+    
     
 
 class grapy():
@@ -73,6 +95,9 @@ class grapy():
             return grapy.add_verts(self, verts)
         def add_edges(self, edges: np.ndarray) -> grapy.graph:
             return grapy.add_edges(self, edges)
+
+        def deg(self, verts: int|np.ndarray=None) -> grapy.graph:
+            return grapy.deg(self, verts)
         
 
     class edges():
@@ -229,3 +254,14 @@ class grapy():
 
         united_edges = np.unique(np.append(g.edges, edges, axis=0), axis=0)
         return cls.graph(g.verts.copy(), united_edges)
+
+    @classmethod
+    def deg(cls, g: graph, verts: int|np.ndarray=None) -> graph:
+        if type(verts) is int:
+            return np.sum(g.edges == verts)
+        if verts is None:
+            verts = g.verts
+
+        comparsion_mtx = np.repeat(g.edges.flatten()[:,np.newaxis], len(verts), axis=1)
+        comparsion_mtx = comparsion_mtx == verts
+        return np.sum(comparsion_mtx, axis=0)
