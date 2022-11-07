@@ -137,6 +137,15 @@ class grapy():
     def from_edges(cls, edges: np.ndarray) -> graph:
         verts = np.unique(edges)
         return cls.graph(verts, edges)
+    @classmethod
+    def from_adjacency_mtx(cls, adjacency_mtx: np.ndarray) -> graph:
+        if type(adjacency_mtx) is not np.ndarray:
+            adjacency_mtx = np.array(adjacency_mtx)
+        if len(adjacency_mtx.shape) == 2 and adjacency_mtx.shape[0] == adjacency_mtx.shape[0]:
+            return cls.from_edges(np.argwhere(adjacency_mtx))
+        if adjacency_mtx.shape == (0,):
+            return cls.graph([], [])
+        raise ValueError(f'adjacency mtx must be of shape (n,n) or (0,) not {adjacency_mtx.shape}')
 
     @classmethod
     def get_egdes(cls, g: graph, verts: int|np.ndarray, verts2: None|int|np.ndarray=None) -> np.ndarray:
@@ -165,7 +174,7 @@ class grapy():
         neighb1 = g.edges[mask1][:,1]
         neighb2 = g.edges[mask2][:,0]
 
-        return np.union1d(neighb1, neighb2)
+        return np.setdiff1d(np.union1d(neighb1, neighb2), verts)
 
     @classmethod
     def contains(cls, g: graph, other: int|np.ndarray|graph) -> bool|np.ndarray:
