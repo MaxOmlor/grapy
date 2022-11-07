@@ -217,6 +217,18 @@ class TestGrapy(unittest.TestCase):
         g = gp.from_edges([[1,2],[2,3],[3,1]])
         self.assertArrayEqual(g.argmaxdeg(), [1,2,3])
 
+    def test_adjacency_mtx_empty(self):
+        g = gp.graph([], [])
+        self.assertArrayEqual(g.adjacency_mtx(), [])
+    def test_adjacency_mtx(self):
+        g = gp.from_edges([[1,2],[2,3]])
+        expected = [
+            [False, True, False],
+            [True, False, True],
+            [False, True, False],
+        ]
+        self.assertArrayEqual(g.adjacency_mtx(), expected)
+
     def test_cycles(self): pass
     def test_perimeter(self): pass # umfang -> länge des längsten kreises in graph
     def test_waistsize(self): pass # taillenweite -> länge eines kuerzesten kreises in graph
@@ -230,6 +242,9 @@ class TestGrapy(unittest.TestCase):
 
     def test_is_forest(self): pass
     def test_is_tree(self): pass
+
+
+
 
     def assertArrayEqual(self, first, second):
         result = np.array_equal(first, second)
