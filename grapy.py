@@ -99,6 +99,10 @@ class grapy():
         def deg(self, verts: int|np.ndarray=None) -> grapy.graph:
             return grapy.deg(self, verts)
         
+        def mindeg(self) -> grapy.graph:
+            return grapy.mindeg(self)
+        def maxdeg(self) -> grapy.graph:
+            return grapy.maxdeg(self)
 
     class edges():
         @classmethod
@@ -265,3 +269,10 @@ class grapy():
         comparsion_mtx = np.repeat(g.edges.flatten()[:,np.newaxis], len(verts), axis=1)
         comparsion_mtx = comparsion_mtx == verts
         return np.sum(comparsion_mtx, axis=0)
+
+    @classmethod
+    def mindeg(cls, g: graph) -> graph:
+        return np.min(cls.deg(g))
+    @classmethod
+    def maxdeg(cls, g: graph) -> graph:
+        return np.max(cls.deg(g))
