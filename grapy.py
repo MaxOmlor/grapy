@@ -45,11 +45,11 @@ class grapy():
             if type(edges) is not np.ndarray:
                 edges = np.array(edges)
 
-            if len(edges.shape) != 2 or edges.shape[1] != 2:
+            if edges.size > 0 and (len(edges.shape) != 2 or edges.shape[1] != 2):
                 raise ValueError(f'edges.shape must be (n,2) not {edges.shape}')
 
             self.verts = verts
-            self.edges = grapy.edges.rm_dupes(edges)
+            self.edges = grapy.edges.rm_dupes(edges) if edges.size > 0 else edges
 
             # predicates
             # - start and end of every edges must be in verts
@@ -266,7 +266,8 @@ class grapy():
         if verts is None:
             verts = g.verts
 
-        comparsion_mtx = np.repeat(g.edges.flatten()[:,np.newaxis], len(verts), axis=1)
+        edges = g.edges[np.newaxis] if len(g.edges.shape) == 1 else g.edges
+        comparsion_mtx = np.repeat(edges.flatten()[:,np.newaxis], len(verts), axis=1)
         comparsion_mtx = comparsion_mtx == verts
         return np.sum(comparsion_mtx, axis=0)
 
