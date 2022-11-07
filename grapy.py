@@ -1,6 +1,7 @@
 from __future__ import annotations
 import numpy as np
-from collections.abc import Iterable
+import scipy as sp
+
 
 
 class numpy_extensions():
@@ -34,6 +35,16 @@ class numpy_extensions():
             comparsion = comparsion.all(axis=i)
         return comparsion.any(axis=axis)
 
+    @classmethod
+    def replace(cls, a: np.ndarray, values: any, replacements: any) -> np.ndarray:
+        if len(a) == 0:
+            return np.copy(a)
+        if type(replacements) is not np.ndarray:
+            replacements = np.array(replacements)
+
+        d = dict(zip(values, replacements))
+        result = np.frompyfunc(lambda x: d[x], 1, 1)(a)
+        return result.astype(replacements.dtype)
     
     
 
@@ -107,6 +118,9 @@ class grapy():
             return grapy.argmindeg(self)
         def argmaxdeg(self) -> grapy.graph:
             return grapy.argmaxdeg(self)
+
+        def adjacency_mtx(self) -> np.ndarray:
+            return grapy.adjacency_mtx(self)
 
     class edges():
         @classmethod
@@ -300,3 +314,17 @@ class grapy():
         degs = g.deg()
         verts = g.verts[degs == np.max(degs)]
         return verts[0] if len(verts) == 1 else verts
+
+    @classmethod
+    def adjacency_mtx(cls, g: graph) -> np.ndarray:
+        if len(g.verts) == 0:
+            return np.array([])
+
+        shape = (len(g.verts), len(g.verts))
+        if not np.any(g.edges):
+            return np.full(shape, False)
+
+        ids = numpy_extensions.replace(g.edges, g.verts, np.arange(len(g.verts)))
+        ids = np.append(ids, np.flip(ids, axis=1), axis=0)
+        values = (np.full(ids.shape[0], True), (ids[:,0], ids[:,1]))
+        return sp.sparse.coo_matrix(values, shape=shape, dtype=bool).toarray()
