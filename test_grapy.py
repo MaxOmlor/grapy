@@ -148,8 +148,17 @@ class TestGrapy(unittest.TestCase):
         expected = np.array([1,2,1,0])
         self.assertArrayEqual(g.deg(), expected)
 
-    def test_mindeg(self): pass
-    def test_maxdeg(self): pass
+    def test_mindeg_0(self):
+        g = gp.graph([1,2,3,4], [[1,2],[2,3]])
+        self.assertArrayEqual(g.mindeg(), 0)
+    def test_mindeg_1(self):
+        g = gp.graph([1,2,3], [[1,2],[2,3]])
+        self.assertArrayEqual(g.mindeg(), 1)
+    def test_maxdeg_0(self): pass
+    def test_maxdeg_2(self): pass
+    def test_argmindeg(self): pass
+    def test_argmaxdeg(self): pass
+
 
     def test_perimeter(self): pass # umfang -> länge des längsten kreises in graph
     def test_waistsize(self): pass # taillenweite -> länge eines kuerzesten kreises in graph
