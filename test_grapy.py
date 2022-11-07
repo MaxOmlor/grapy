@@ -11,17 +11,36 @@ class TestGrapy(unittest.TestCase):
     double_tris = gp.from_edges([[1,2], [2,3], [3,1], [3,4], [4,5], [5,6], [6,4], [6,1]])
 
     def test_from_edges_empty(self):
-        edges = []
-        g = gp.from_edges(edges)
+        g = gp.from_edges([])
         self.assertArrayEqual(g.verts, [])
-        self.assertArrayEqual(g.edges, edges)
+        self.assertArrayEqual(g.edges, [])
     def test_from_edges_es(self):
         edges = [[1,2], [2,3], [3,2]]
         expected_edges = [[1,2], [2,3]]
         g = gp.from_edges(edges)
         self.assertArrayEqual(g.verts, [1,2,3])
         self.assertArrayEqual(g.edges, expected_edges)
-    #def 
+    def test_from_adjacency_mtx_empty(self):
+        g = gp.from_adjacency_mtx([])
+        self.assertArrayEqual(g.verts, [])
+        self.assertArrayEqual(g.edges, [])
+    def test_from_adjacency_mtx(self):
+        g = gp.from_adjacency_mtx([
+            [0,1,0],
+            [1,0,1],
+            [0,1,0],
+        ])
+        self.assertArrayEqual(g.verts, [0,1,2])
+        self.assertArrayEqual(g.edges, [[0,1],[1,2]])
+    def test_from_adjacency_mtx_bool(self):
+        g = gp.from_adjacency_mtx([
+            [False, True, False],
+            [True, False, True],
+            [False, True, False],
+        ])
+        self.assertArrayEqual(g.verts, [0,1,2])
+        self.assertArrayEqual(g.edges, [[0,1],[1,2]])
+
 
     def test_len(self):
         self.assertEqual(len(TestGrapy.double_tris), 6)
