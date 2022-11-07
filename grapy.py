@@ -103,6 +103,10 @@ class grapy():
             return grapy.mindeg(self)
         def maxdeg(self) -> grapy.graph:
             return grapy.maxdeg(self)
+        def argmindeg(self) -> grapy.graph:
+            return grapy.argmindeg(self)
+        def argmaxdeg(self) -> grapy.graph:
+            return grapy.argmaxdeg(self)
 
     class edges():
         @classmethod
@@ -277,3 +281,13 @@ class grapy():
     @classmethod
     def maxdeg(cls, g: graph) -> graph:
         return np.max(cls.deg(g))
+    @classmethod
+    def argmindeg(cls, g: graph) -> graph:
+        degs = g.deg()
+        verts = g.verts[degs == np.min(degs)]
+        return verts[0] if len(verts) == 1 else verts
+    @classmethod
+    def argmaxdeg(cls, g: graph) -> graph:
+        degs = g.deg()
+        verts = g.verts[degs == np.max(degs)]
+        return verts[0] if len(verts) == 1 else verts
