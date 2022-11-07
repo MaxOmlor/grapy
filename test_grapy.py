@@ -135,6 +135,24 @@ class TestGrapy(unittest.TestCase):
         self.assertArrayEqual(result.verts, expected.verts)
         self.assertArrayEqual(result.edges, expected.edges)
 
+    def test_deg_1v(self): pass
+    def test_deg_vs(self): pass
+    def test_deg(self): pass
+    def test_mindeg(self): pass
+    def test_maxdeg(self): pass
+
+    def test_perimeter(self): pass # umfang -> länge des längsten kreises in graph
+    def test_waistsize(self): pass # taillenweite -> länge eines kuerzesten kreises in graph
+    def test_diameter(self): pass # durchmesser -> größter abstand zweier ecken in graph
+
+    def test_center(self): pass # zentrale ecke -> größter abstand von anderen ecken möglichst klein
+    def test_radius(self): pass # größter abstand von center zu ecke
+
+    def test_is_connected(self): pass
+    def test_components(self): pass
+
+    def test_is_forest(self): pass
+    def test_is_tree(self): pass
 
     def assertArrayEqual(self, first, second):
         result = np.array_equal(first, second)
