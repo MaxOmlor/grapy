@@ -20,6 +20,7 @@ class TestGrapy(unittest.TestCase):
     def test_len(self):
         self.assertEqual(len(TestGrapy.double_tris), 6)
 
+    def test_get_edges_1v_graph(self): pass
     def test_get_edges_1v(self):
         result = TestGrapy.double_tris.get_edges(1)
         self.assertArrayEqual(result, np.array([[1,2],[1,3],[1,6]]))
@@ -61,6 +62,7 @@ class TestGrapy(unittest.TestCase):
     def test_contains_g_false(self):
         g = gp.from_edges([[1,2],[2,5]])
         self.assertFalse(g in TestGrapy.double_tris)
+    def test_contains_empty_g(self): pass
 
     def test_get_item(self):
         result = TestGrapy.double_tris[[1,2,3,5]]
@@ -68,6 +70,7 @@ class TestGrapy(unittest.TestCase):
         self.assertArrayEqual(result.verts, expected.verts)
         self.assertArrayEqual(result.edges, expected.edges)
 
+    def test_sub_empty_g(self): pass
     def test_sub_1v(self):
         g = gp.from_edges([[1,2], [2,3]])
         result = g-3
@@ -109,6 +112,7 @@ class TestGrapy(unittest.TestCase):
         self.assertArrayEqual(result2.verts, expected.verts)
         self.assertArrayEqual(result2.edges, expected.edges)
     
+    def test_add_empty_g(self): pass
     def test_add_1v(self):
         g = gp.from_edges([[1,2]])
         result = g + 3
@@ -146,27 +150,47 @@ class TestGrapy(unittest.TestCase):
         self.assertEqual(g.deg(4), 0)
     def test_deg_vs(self):
         g = gp.graph([1,2,3,4], [[1,2],[2,3]])
-        expected = np.array([2,0])
-        self.assertArrayEqual(g.deg([2,4]), expected)
+        self.assertArrayEqual(g.deg([2,4]), [2,0])
     def test_deg(self):
         g = gp.graph([1,2,3,4], [[1,2],[2,3]])
-        expected = np.array([1,2,1,0])
-        self.assertArrayEqual(g.deg(), expected)
+        self.assertArrayEqual(g.deg(), [1,2,1,0])
 
     def test_mindeg_0(self):
         g = gp.graph([1,2,3,4], [[1,2],[2,3]])
         self.assertArrayEqual(g.mindeg(), 0)
     def test_mindeg_1(self):
-        g = gp.graph([1,2,3], [[1,2],[2,3]])
+        g = gp.from_edges([[1,2],[2,3]])
         self.assertArrayEqual(g.mindeg(), 1)
     def test_maxdeg_0(self):
         g = gp.graph([1,2], [])
         self.assertArrayEqual(g.maxdeg(), 0)
     def test_maxdeg_2(self):
-        g = gp.graph([1,2,3], [[1,2],[2,3]])
+        g = gp.from_edges([[1,2],[2,3]])
         self.assertArrayEqual(g.maxdeg(), 2)
-    def test_argmindeg(self): pass
-    def test_argmaxdeg(self): pass
+    def test_argmindeg_0(self):
+        g = gp.graph([1,2,3,4], [[1,2],[2,3]])
+        self.assertArrayEqual(g.argmindeg(), 4)
+    def test_argmindeg_0_vs(self):
+        g = gp.graph([1,2,3,4,5], [[1,2],[2,3]])
+        self.assertArrayEqual(g.argmindeg(), [4,5])
+    def test_argmindeg_1(self):
+        g = gp.from_edges([[1,2],[2,3],[3,1],[3,4]])
+        self.assertArrayEqual(g.argmindeg(), 4)
+    def test_argmindeg_1_vs(self):
+        g = gp.from_edges([[1,2],[2,3]])
+        self.assertArrayEqual(g.argmindeg(), [1,3])
+    def test_argmaxdeg_0(self):
+        g = gp.graph([1], [])
+        self.assertArrayEqual(g.argmaxdeg(), 1)
+    def test_argmaxdeg_0_vs(self):
+        g = gp.graph([1,2], [])
+        self.assertArrayEqual(g.argmaxdeg(), [1,2])
+    def test_argmaxdeg_2(self):
+        g = gp.from_edges([[1,2],[2,3]])
+        self.assertArrayEqual(g.argmaxdeg(), 2)
+    def test_argmaxdeg_2_vs(self):
+        g = gp.from_edges([[1,2],[2,3],[3,1]])
+        self.assertArrayEqual(g.argmaxdeg(), [1,2,3])
 
 
     def test_perimeter(self): pass # umfang -> länge des längsten kreises in graph
