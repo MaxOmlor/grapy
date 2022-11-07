@@ -10,12 +10,18 @@ class TestNpExtensions(unittest.TestCase):
 class TestGrapy(unittest.TestCase):
     double_tris = gp.from_edges([[1,2], [2,3], [3,1], [3,4], [4,5], [5,6], [6,4], [6,1]])
 
-    def test_from_edges(self):
+    def test_from_edges_empty(self):
+        edges = []
+        g = gp.from_edges(edges)
+        self.assertArrayEqual(g.verts, [])
+        self.assertArrayEqual(g.edges, edges)
+    def test_from_edges_es(self):
         edges = [[1,2], [2,3], [3,2]]
         expected_edges = [[1,2], [2,3]]
         g = gp.from_edges(edges)
-        self.assertArrayEqual(g.verts, np.array([1,2,3]))
-        self.assertArrayEqual(g.edges, np.array(expected_edges))
+        self.assertArrayEqual(g.verts, [1,2,3])
+        self.assertArrayEqual(g.edges, expected_edges)
+    #def 
 
     def test_len(self):
         self.assertEqual(len(TestGrapy.double_tris), 6)
@@ -23,20 +29,20 @@ class TestGrapy(unittest.TestCase):
     def test_get_edges_1v_graph(self): pass
     def test_get_edges_1v(self):
         result = TestGrapy.double_tris.get_edges(1)
-        self.assertArrayEqual(result, np.array([[1,2],[1,3],[1,6]]))
+        self.assertArrayEqual(result, [[1,2],[1,3],[1,6]])
     def test_get_edges_vs(self):
         result = TestGrapy.double_tris.get_edges([1,2])
-        self.assertArrayEqual(result, np.array([[1,2],[1,3],[1,6],[2,3]]))
+        self.assertArrayEqual(result, [[1,2],[1,3],[1,6],[2,3]])
     def test_get_edges_from_to_vs(self):
         result = TestGrapy.double_tris.get_edges([1, 2, 3], [4, 5, 6])
-        self.assertArrayEqual(result, np.array([[1,6],[3,4]]))
+        self.assertArrayEqual(result, [[1,6],[3,4]])
 
     def test_neighb_1v(self):
         result = TestGrapy.double_tris.neighb(1)
-        self.assertArrayEqual(result, np.array([2,3,6]))
+        self.assertArrayEqual(result, [2,3,6])
     def test_neighb_vs(self):
         result = TestGrapy.double_tris.neighb([1,3])
-        self.assertArrayEqual(result, np.array([1,2,3,4,6]))
+        self.assertArrayEqual(result, [2,4,6])
 
     def test_contains_1v_true(self):
         self.assertTrue(1 in TestGrapy.double_tris)
@@ -192,7 +198,7 @@ class TestGrapy(unittest.TestCase):
         g = gp.from_edges([[1,2],[2,3],[3,1]])
         self.assertArrayEqual(g.argmaxdeg(), [1,2,3])
 
-
+    def test_cycles(self): pass
     def test_perimeter(self): pass # umfang -> länge des längsten kreises in graph
     def test_waistsize(self): pass # taillenweite -> länge eines kuerzesten kreises in graph
     def test_diameter(self): pass # durchmesser -> größter abstand zweier ecken in graph
