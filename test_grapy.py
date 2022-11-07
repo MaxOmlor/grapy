@@ -135,9 +135,19 @@ class TestGrapy(unittest.TestCase):
         self.assertArrayEqual(result.verts, expected.verts)
         self.assertArrayEqual(result.edges, expected.edges)
 
-    def test_deg_1v(self): pass
-    def test_deg_vs(self): pass
-    def test_deg(self): pass
+    def test_deg_1v(self):
+        g = gp.graph([1,2,3,4], [[1,2],[2,3]])
+        self.assertEqual(g.deg(2), 2)
+        self.assertEqual(g.deg(4), 0)
+    def test_deg_vs(self):
+        g = gp.graph([1,2,3,4], [[1,2],[2,3]])
+        expected = np.array([2,0])
+        self.assertArrayEqual(g.deg([2,4]), expected)
+    def test_deg(self):
+        g = gp.graph([1,2,3,4], [[1,2],[2,3]])
+        expected = np.array([1,2,1,0])
+        self.assertArrayEqual(g.deg(), expected)
+
     def test_mindeg(self): pass
     def test_maxdeg(self): pass
 
