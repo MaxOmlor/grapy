@@ -1,6 +1,6 @@
 from __future__ import annotations
 import numpy as np
-import scipy as sp
+#import scipy as sp
 
 
 
@@ -45,6 +45,21 @@ class numpy_extensions():
         d = dict(zip(values, replacements))
         result = np.frompyfunc(lambda x: d[x], 1, 1)(a)
         return result.astype(replacements.dtype)
+
+    @classmethod
+    def setitem_multi_index(cls, a: np.ndarray, ids: np.ndarray, values: np.ndarray) -> np.ndarray:
+        flat_a = a.flatten()
+        flat_ids = np.ravel_multi_index(np.transpose(ids), a.shape)
+
+        flat_a[flat_ids] = values
+
+        return flat_a.reshape(a.shape)
+    @classmethod
+    def getitem_multi_index(cls, a: np.ndarray, ids: np.ndarray, values: np.ndarray) -> np.ndarray:
+        flat_a = a.flatten()
+        flat_ids = np.ravel_multi_index(np.transpose(ids), a.shape)
+
+        return flat_a[flat_ids]
     
     
 
@@ -316,7 +331,7 @@ class grapy():
         return verts[0] if len(verts) == 1 else verts
 
     @classmethod
-    def adjacency_mtx(cls, g: graph) -> np.ndarray:
+    def adjacency_mtx(cls, g: graph, directed: bool=False) -> np.ndarray:
         if len(g.verts) == 0:
             return np.array([])
 
@@ -325,6 +340,21 @@ class grapy():
             return np.full(shape, False)
 
         ids = numpy_extensions.replace(g.edges, g.verts, np.arange(len(g.verts)))
+        
+        '''
         ids = np.append(ids, np.flip(ids, axis=1), axis=0)
         values = (np.full(ids.shape[0], True), (ids[:,0], ids[:,1]))
         return sp.sparse.coo_matrix(values, shape=shape, dtype=bool).toarray()
+        '''
+
+        ids = np.transpose(ids)
+        shape = (len(g.verts), len(g.verts))
+        
+        flat_ids = np.ravel_multi_index(ids, shape)
+        if not directed:
+            flat_ids = np.append(flat_ids, ~flat_ids)
+        flat_mtx = np.full(shape[0]*shape[1], False)
+
+        flat_mtx[flat_ids] = True
+
+        return flat_mtx.reshape(shape)
