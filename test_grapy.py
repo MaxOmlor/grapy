@@ -3,11 +3,34 @@ from grapy import numpy_extensions as ne
 from grapy import grapy as gp
 import numpy as np
 
-class TestNpExtensions(unittest.TestCase):
-    pass
+class TestCaseNp(unittest.TestCase):
+    def assertArrayEqual(self, first, second):
+        result = np.array_equal(first, second)
+        msg = '' if result else f'arrays are different\n{first}\n!=\n{second}'
+        self.assertTrue(result, msg)
+
+class TestNumpyExtensions(TestCaseNp):
+    def test_contains_1d(self):
+        a = [0,1,2]
+        b = [0,3,1,4]
+        self.assertArrayEqual(ne.contains(a,b), [True, False, True, False])
+    def test_contains_2d_2(self):
+        a = [[0,1],[1,2]]
+        b = [[0,1],[0,2],[1,2]]
+        self.assertArrayEqual(ne.contains(a,b), [True, False, True])
+    def test_contains_2d_3(self):
+        a = [[0,1,2],[1,2,3]]
+        b = [[0,1,2],[0,2,4],[1,2,3]]
+        self.assertArrayEqual(ne.contains(a,b), [True, False, True])
+    def test_contains_3d_2(self):
+        a = np.arange(8).reshape((2,2,2))
+        b = [[[0,1],[2,3]], [[4,5],[6,0]]]
+        self.assertArrayEqual(ne.contains(a,b), [True, False])
+
+    def test_argcontains(self): pass
 
 
-class TestGrapy(unittest.TestCase):
+class TestGrapy(TestCaseNp):
     double_tris = gp.from_edges([[1,2], [2,3], [3,1], [3,4], [4,5], [5,6], [6,4], [6,1]])
 
     def test_from_edges_empty(self):
@@ -242,11 +265,3 @@ class TestGrapy(unittest.TestCase):
 
     def test_is_forest(self): pass
     def test_is_tree(self): pass
-
-
-
-
-    def assertArrayEqual(self, first, second):
-        result = np.array_equal(first, second)
-        msg = '' if result else f'arrays are different\n{first}\n!=\n{second}'
-        self.assertTrue(result, msg)
