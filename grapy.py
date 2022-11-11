@@ -24,8 +24,8 @@ class numpy_extensions():
     '''
 
     @classmethod
-    def contains_vec(cls, a: np.ndarray, b: np.ndarray, axis=1) -> np.ndarray:
-        if type(a) is not np.ndarray:
+    def contains(cls, a: np.ndarray, b: np.ndarray) -> np.ndarray:
+        '''if type(a) is not np.ndarray:
             a = np.array(a)
         if type(b) is not np.ndarray:
             b = np.array(b)
@@ -33,7 +33,16 @@ class numpy_extensions():
         comparsion = np.expand_dims(b, 1) == a
         for i in range(len(a.shape), axis, -1):
             comparsion = comparsion.all(axis=i)
-        return comparsion.any(axis=axis)
+        return comparsion.any(axis=axis)'''
+
+        if len(np.shape(a)) == 1 and len(np.shape(a)) == 1:
+            return np.in1d(b, a)
+
+        dims = (np.maximum(np.max(a),np.max(b))+1,)*(np.sum(np.shape(a)[1:]))
+        hash_a = cls.flatten_multi_index(a, dims)
+        hash_b = cls.flatten_multi_index(b, dims)
+        return np.in1d(hash_b, hash_a)
+
 
     @classmethod
     def replace(cls, a: np.ndarray, values: any, replacements: any) -> np.ndarray:
@@ -60,7 +69,61 @@ class numpy_extensions():
         flat_ids = np.ravel_multi_index(np.transpose(ids), a.shape)
 
         return flat_a[flat_ids]
-    
+
+    @classmethod
+    def flatten_multi_index(cls, ids: np.ndarray, dims, dtype: np.dtype=None, axis: int=1) -> np.ndarray:
+        '''
+        # Notes
+
+        Encodes a vector of n dimensions to scalar.
+        There for the vector must be inside the hypercube given by dims parameter.
+        An unique id is assigned to every position in this hypercube.
+        The resulting scalar of a given vector is determined by the id of the cell of the hypercube the vector is pointing to.
+
+        this concept is extended for tensors insted of vectors,
+        by reshapeing the tensor and the dims to a 1d tensor.
+
+        This implementation of the method only workes for vectors of integer values.
+
+        # Examples
+
+        >>> dims = (2,2)
+        >>> vec_for_every_pos = [[0,0],[0,1],[1,0],[1,1]]
+        >>> flatten_multi_index(vec_for_every_pos, dims)
+        array([0., 1., 2., 3.])
+
+        possible for n dims
+        >>> ne.flatten_multi_index([[0,1,2],[1,2,3]], (4,4,4))
+        array([ 6., 27.])
+
+        encode a tensor
+        >>> a = np.arange(8).reshape((2,2,2))
+        >>> dims = (np.max(a),) *np.shape(a)[1] *np.shape(a)[2]
+        >>> ne.flatten_multi_index(a, dims)
+        array([  66, 1666])
+        '''
+        if dtype and type(ids) is np.ndarray:
+            ids = ids.astype(dtype)
+        elif dtype:
+            ids = np.array(ids).astype(dtype)
+
+        flatten_ids = cls.flatten(ids, axis=axis)
+        flatten_dims = cls.flatten(dims)
+
+        basis = np.array([np.prod(flatten_dims[i+1:]) for i in np.arange(len(flatten_dims))])
+        ids_transformed = np.multiply(flatten_ids, basis)
+        return np.sum(ids_transformed, axis=1)
+
+
+    @classmethod
+    def one_hot(cls, values: np.ndarray, class_count: int) -> np.ndarray:
+        return np.eye(class_count)[np.reshape(values,-1)]
+
+    @classmethod
+    def flatten(cls, a: np.ndarray, axis: int=0) -> np.ndarray:
+        shape = np.shape(a)
+        new_shape = shape[:axis] + (np.prod(shape[axis:]),)
+        return np.reshape(a, new_shape)
     
 
 class grapy():
@@ -103,7 +166,7 @@ class grapy():
             return grapy.contains_edges(self, edges)
 
         def __getitem__(self, verts) -> grapy.graph:
-            if not np.all(numpy_extensions.contains_vec(self.verts, verts)):
+            if not np.all(numpy_extensions.contains(self.verts, verts)):
                 raise ValueError(f'verts {verts} not in {self.verts}')
             
             return grapy.graph(verts, self.get_edges(verts, verts))
@@ -183,13 +246,13 @@ class grapy():
         if type(verts2) is int:
             verts = np.array([verts2])
 
-        mask = (numpy_extensions.contains_vec(verts, g.edges[:,0])
-            | numpy_extensions.contains_vec(verts, g.edges[:, 1])
+        mask = (numpy_extensions.contains(verts, g.edges[:,0])
+            | numpy_extensions.contains(verts, g.edges[:, 1])
             if verts2 is None else
-            (numpy_extensions.contains_vec(verts, g.edges[:,0])
-            & numpy_extensions.contains_vec(verts2, g.edges[:,1]))
-            | (numpy_extensions.contains_vec(verts, g.edges[:, 1]))
-            & numpy_extensions.contains_vec(verts2, g.edges[:,0]))
+            (numpy_extensions.contains(verts, g.edges[:,0])
+            & numpy_extensions.contains(verts2, g.edges[:,1]))
+            | (numpy_extensions.contains(verts, g.edges[:, 1]))
+            & numpy_extensions.contains(verts2, g.edges[:,0]))
         
         return g.edges[mask]
         
@@ -198,8 +261,8 @@ class grapy():
         if type(verts) is int:
             verts = np.array([verts])
 
-        mask1 = numpy_extensions.contains_vec(verts, g.edges[:,0])
-        mask2 = numpy_extensions.contains_vec(verts, g.edges[:,1])
+        mask1 = numpy_extensions.contains(verts, g.edges[:,0])
+        mask2 = numpy_extensions.contains(verts, g.edges[:,1])
         neighb1 = g.edges[mask1][:,1]
         neighb2 = g.edges[mask2][:,0]
 
@@ -212,8 +275,8 @@ class grapy():
             return other in g.verts
         # ggraph
         if type(other) is grapy.graph:
-            return (numpy_extensions.contains_vec(g.verts, other.verts).all()
-                and numpy_extensions.contains_vec(g.edges, other.edges).all())
+            return (numpy_extensions.contains(g.verts, other.verts).all()
+                and numpy_extensions.contains(g.edges, other.edges).all())
 
         if type(other) is not np.ndarray:
             other = np.array(other)
@@ -223,7 +286,7 @@ class grapy():
         
         # multiple verts
         if len(other.shape) == 1:
-            return numpy_extensions.contains_vec(g.verts, other).all()
+            return numpy_extensions.contains(g.verts, other).all()
         # multiple edges
         if len(other.shape) == 2:
             return cls.contains_edges(g, other)
@@ -231,7 +294,7 @@ class grapy():
     def contains_verts(cls, g: graph, verts: int|np.ndarray) -> bool|np.ndarray:
         if type(verts) is int:
             return verts in g.verts
-        return numpy_extensions.contains_vec(g.verts, verts).all()
+        return numpy_extensions.contains(g.verts, verts).all()
     @classmethod
     def contains_edges(cls, g: graph, edges: np.ndarray) -> bool|np.ndarray:
         return cls.edges.contains_edges(g.edges, edges).all()
