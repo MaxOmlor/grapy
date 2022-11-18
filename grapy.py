@@ -8,16 +8,6 @@ from collections.abc import Iterable
 class numpy_extensions():
     @classmethod
     def contains(cls, a: np.ndarray, b: np.ndarray) -> np.ndarray:
-        '''if type(a) is not np.ndarray:
-            a = np.array(a)
-        if type(b) is not np.ndarray:
-            b = np.array(b)
-            
-        comparsion = np.expand_dims(b, 1) == a
-        for i in range(len(a.shape), axis, -1):
-            comparsion = comparsion.all(axis=i)
-        return comparsion.any(axis=axis)'''
-
         if len(np.shape(a)) == 1 and len(np.shape(a)) == 1:
             return np.in1d(b, a)
 
@@ -151,6 +141,59 @@ class numpy_extensions():
         shape = np.shape(a)
         new_shape = shape[:axis] + (np.prod(shape[axis:]),)
         return np.reshape(a, new_shape)
+
+    @classmethod
+    def view_nd(cls, a: np.ndarray, id_mtx: np.ndarray) -> np.ndarray:
+        '''
+        # Notes
+
+        Makes it possible to generate view from multidimensional id-array.
+        Therefor every id in id_mtx gets substituted by its related item in a.
+        In the simplest case view_nd is equevalent to a[id].
+
+        # Examples
+
+        equevalent to a[id]
+        >>> ne.view_nd([1,2,3], [2,0,1])
+        array([3, 1, 2])
+        
+        multi dim id_mtx
+        >>> id_mtx = np.array([[0,1,2], [1,2,0], [2,0,1]])
+        >>> id_mtx
+        array([[0, 1, 2],
+                [1, 2, 0],
+                [2, 0, 1]])
+        >>> ne.view_nd([1,2,3], id_mtx)
+        array([[1, 2, 3],
+                [2, 3, 1],
+                [3, 1, 2]])
+
+        multi dim a and id_mtx
+        >>> a = np.array([[1,2],[3,4],[5,6]])
+        >>> a
+        array([[1, 2],
+                [3, 4],
+                [5, 6]])
+        >>> ne.view_nd(a, id_mtx)
+        array([[[1, 2],
+                [3, 4],
+                [5, 6]],
+               [[3, 4],
+                [5, 6],
+                [1, 2]],
+               [[5, 6],
+                [1, 2],
+                [3, 4]]])
+        '''
+        if type(a) is not np.ndarray:
+            a = np.array(a)
+        if type(id_mtx) is not np.ndarray:
+            id_mtx = np.array(id_mtx)
+
+        ids_flatten = id_mtx.reshape(np.prod(id_mtx.shape))
+        result_flatten = a[ids_flatten]
+        shape = (*id_mtx.shape, *(a.shape[1:])) if len(a.shape) > 1 else id_mtx.shape
+        return result_flatten.reshape(shape)
     
 
 class grapy():
