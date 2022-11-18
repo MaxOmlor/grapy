@@ -29,6 +29,20 @@ class TestNumpyExtensions(TestCaseNp):
 
     def test_argcontains(self): pass
 
+    def test_replace_single_vals(self):
+        a = [1,2,3,2,1]
+        expected = [0,2,3,2,0]
+        self.assertArrayEqual(ne.replace(a, 1, 0), expected)
+    def test_replace_multi_vals(self):
+        a = [1,2,3,2,1]
+        expected = [-1,-2,3,-2,-1]
+        self.assertArrayEqual(ne.replace(a, [1,2], [-1,-2]), expected)
+    def test_replace_multi_dims(self):
+        a = [[1,2],[1,3],[2,4]]
+        expected = [[0, 1],[0, 2],[1, 3]]
+        self.assertArrayEqual(ne.replace(a, [1,2,3,4], [0,1,2,3]), expected)
+
+
 
 class TestGrapy(TestCaseNp):
     double_tris = gp.from_edges([[1,2], [2,3], [3,1], [3,4], [4,5], [5,6], [6,4], [6,1]])
@@ -251,6 +265,16 @@ class TestGrapy(TestCaseNp):
             [False, True, False],
         ]
         self.assertArrayEqual(g.adjacency_mtx(), expected)
+    def test_adjacency_tree(self):
+        g = gp.from_edges([[1,2], [2,3], [1,4]])
+        expected = [
+            [False, True, False, True],
+            [True, False, True, False],
+            [False, True, False, False],
+            [True, False, False, False],
+        ]
+        self.assertArrayEqual(g.adjacency_mtx(), expected)
+    
 
     def test_cycles(self): pass
     def test_perimeter(self): pass # umfang -> länge des längsten kreises in graph
