@@ -42,6 +42,31 @@ class TestNumpyExtensions(TestCaseNp):
         expected = [[0, 1],[0, 2],[1, 3]]
         self.assertArrayEqual(ne.replace(a, [1,2,3,4], [0,1,2,3]), expected)
 
+    def test_view_nd_1dim_a_1dim_id(self):
+        a = [1,2,3]
+        id_mtx = [2,0,1]
+        expected = [3,1,2]
+        self.assertArrayEqual(ne.view_nd(a, id_mtx), expected)
+    def test_view_nd_1dim_a_2dim_id(self):
+        a = [1,2,3]
+        id_mtx = [[0,1,2],[1,2,0],[2,0,1]]
+        expected = [[1,2,3],[2,3,1],[3,1,2]]
+        self.assertArrayEqual(ne.view_nd(a, id_mtx), expected)
+    def test_view_nd_2dim_a_1dim_id(self):
+        a = [[1,2],[3,4],[5,6]]
+        id_mtx = [2,0,1]
+        expected = [[5,6],[1,2],[3,4]]
+        self.assertArrayEqual(ne.view_nd(a, id_mtx), expected)
+    def test_view_nd_2dim_a_2dim_id(self):
+        a = [[1,2],[3,4],[5,6]]
+        id_mtx = [[0,1,2],[1,2,0],[2,0,1]]
+        expected = [
+            [[1,2],[3,4],[5,6]],
+            [[3,4],[5,6],[1,2]],
+            [[5,6],[1,2],[3,4]]
+        ]
+        self.assertArrayEqual(ne.view_nd(a, id_mtx), expected)
+
 
 
 class TestGrapy(TestCaseNp):
