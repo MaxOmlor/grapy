@@ -1,28 +1,11 @@
 from __future__ import annotations
 import numpy as np
 #import scipy as sp
+from collections.abc import Iterable
 
 
 
 class numpy_extensions():
-    '''
-    class dict(dict):
-        def __init__(self, iterable=None):
-            if iterable:
-                super().__init__(iterable)
-            else:
-                super().__init__()
-        def __getitem__(self, __key):
-            if isinstance(__key, Iterable) and type(__key) is not np.ndarray:
-                __key = np.array(__key)
-            if type(__key) is np.ndarray:
-                return np.frompyfunc(lambda k: super().__getitem__(k), 1, 1)(__key)
-            return super().__getitem__(__key)
-        def __setitem__(self, __key, __value) -> None:
-            for k, v in zip(__key, __value):
-                super().__setitem__(k, v)
-    '''
-
     @classmethod
     def contains(cls, a: np.ndarray, b: np.ndarray) -> np.ndarray:
         '''if type(a) is not np.ndarray:
@@ -46,13 +29,53 @@ class numpy_extensions():
 
     @classmethod
     def replace(cls, a: np.ndarray, values: any, replacements: any) -> np.ndarray:
+        '''
+        # Notes
+
+        Replaces given values in a by given replacements.
+
+        # Examples
+
+        >>> ne.replace([1,2,3,2,1], 1, 0)
+        array([0, 2, 3, 2, 0])
+
+        multiple values
+        >>> ne.replace([1,2,3,2,1], [1,2], [-1,-2])
+        array([-1, -2,  3, -2, -1])
+
+        multiple dimensions
+        >>> a = np.array([[1,2], [1,3], [2,4]])
+        >>> a
+        array([[1, 2],
+                [1, 3],
+                [2, 4]])
+        >>> ne.replace(a, [1,2,3,4], [0,1,2,3])
+        array([[0, 1],
+                [0, 2],
+                [1, 3]])
+        '''
         if len(a) == 0:
             return np.copy(a)
+        if not isinstance(values, Iterable) and not isinstance(replacements, Iterable):
+            result = np.copy(a)
+            result[np.equal(a, values)] = replacements
+            return result
+
+        if isinstance(values, Iterable) and not isinstance(replacements, Iterable):
+            replacements = np.full(values.shape, replacements)
         if type(replacements) is not np.ndarray:
             replacements = np.array(replacements)
 
+        result = np.copy(a)
+        shape = result.shape
+        result = result.flatten()
+
         d = dict(zip(values, replacements))
-        result = np.frompyfunc(lambda x: d[x], 1, 1)(a)
+        def r(x): return d[x]
+
+        mask = np.in1d(result, values)
+        result[mask] = np.frompyfunc(r, 1, 1)(result[mask])
+        result = result.reshape(shape)
         return result.astype(replacements.dtype)
 
     @classmethod
@@ -70,6 +93,10 @@ class numpy_extensions():
 
         return flat_a[flat_ids]
 
+
+    @classmethod
+    def get_basis(cls, dims: tuple[int,int,int]) -> np.ndarray:
+        return np.array([np.prod(dims[i+1:]) for i in np.arange(len(dims))])
     @classmethod
     def flatten_multi_index(cls, ids: np.ndarray, dims, dtype: np.dtype=None, axis: int=1) -> np.ndarray:
         '''
@@ -110,7 +137,7 @@ class numpy_extensions():
         flatten_ids = cls.flatten(ids, axis=axis)
         flatten_dims = cls.flatten(dims)
 
-        basis = np.array([np.prod(flatten_dims[i+1:]) for i in np.arange(len(flatten_dims))])
+        basis = cls.get_basis(flatten_dims)
         ids_transformed = np.multiply(flatten_ids, basis)
         return np.sum(ids_transformed, axis=1)
 
@@ -395,27 +422,21 @@ class grapy():
 
     @classmethod
     def adjacency_mtx(cls, g: graph, directed: bool=False) -> np.ndarray:
-        if len(g.verts) == 0:
+        n = len(g.verts)
+        if n == 0:
             return np.array([])
 
-        shape = (len(g.verts), len(g.verts))
+        shape = (n, n)
         if not np.any(g.edges):
             return np.full(shape, False)
 
-        ids = numpy_extensions.replace(g.edges, g.verts, np.arange(len(g.verts)))
+        ids = numpy_extensions.replace(g.edges, g.verts, np.arange(n))
         
-        '''
-        ids = np.append(ids, np.flip(ids, axis=1), axis=0)
-        values = (np.full(ids.shape[0], True), (ids[:,0], ids[:,1]))
-        return sp.sparse.coo_matrix(values, shape=shape, dtype=bool).toarray()
-        '''
-
         ids = np.transpose(ids)
-        shape = (len(g.verts), len(g.verts))
+        if not directed:
+            ids = np.append(ids, np.flip(ids, axis=0), axis=1)
         
         flat_ids = np.ravel_multi_index(ids, shape)
-        if not directed:
-            flat_ids = np.append(flat_ids, ~flat_ids)
         flat_mtx = np.full(shape[0]*shape[1], False)
 
         flat_mtx[flat_ids] = True
