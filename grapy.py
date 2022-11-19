@@ -143,7 +143,7 @@ class numpy_extensions():
         return np.reshape(a, new_shape)
 
     @classmethod
-    def view_nd(cls, a: np.ndarray, id_mtx: np.ndarray) -> np.ndarray:
+    def getitem_nd(cls, a: np.ndarray, id_mtx: np.ndarray) -> np.ndarray:
         '''
         # Notes
 
@@ -190,10 +190,22 @@ class numpy_extensions():
         if type(id_mtx) is not np.ndarray:
             id_mtx = np.array(id_mtx)
 
-        ids_flatten = id_mtx.reshape(np.prod(id_mtx.shape))
-        result_flatten = a[ids_flatten]
+        ids_flatten = np.ravel(id_mtx)
         shape = (*id_mtx.shape, *(a.shape[1:])) if len(a.shape) > 1 else id_mtx.shape
-        return result_flatten.reshape(shape)
+        return a[ids_flatten].reshape(shape)
+
+    @classmethod
+    def setitem_nd(cls, a: np.ndarray, id_mtx: np.ndarray, values: np.ndarray) -> np.ndarray:
+        if type(id_mtx) is not np.ndarray:
+            id_mtx = np.array(id_mtx)
+        if type(values) is not np.ndarray:
+            values = np.array(values)
+
+        ids_flatten = np.ravel(id_mtx)
+        result = np.copy(a)
+        shape = (np.prod(values.shape[:len(id_mtx.shape)]), *values.shape[len(id_mtx.shape):])
+        result[ids_flatten] = np.reshape(values, shape)
+        return result
     
 
 class grapy():
