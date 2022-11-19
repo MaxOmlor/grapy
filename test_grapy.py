@@ -42,22 +42,22 @@ class TestNumpyExtensions(TestCaseNp):
         expected = [[0, 1],[0, 2],[1, 3]]
         self.assertArrayEqual(ne.replace(a, [1,2,3,4], [0,1,2,3]), expected)
 
-    def test_view_nd_1dim_a_1dim_id(self):
+    def test_getitem_nd_1dim_a_1dim_id(self):
         a = [1,2,3]
         id_mtx = [2,0,1]
         expected = [3,1,2]
-        self.assertArrayEqual(ne.view_nd(a, id_mtx), expected)
-    def test_view_nd_1dim_a_2dim_id(self):
+        self.assertArrayEqual(ne.getitem_nd(a, id_mtx), expected)
+    def test_getitem_nd_1dim_a_2dim_id(self):
         a = [1,2,3]
         id_mtx = [[0,1,2],[1,2,0],[2,0,1]]
         expected = [[1,2,3],[2,3,1],[3,1,2]]
-        self.assertArrayEqual(ne.view_nd(a, id_mtx), expected)
-    def test_view_nd_2dim_a_1dim_id(self):
+        self.assertArrayEqual(ne.getitem_nd(a, id_mtx), expected)
+    def test_getitem_nd_2dim_a_1dim_id(self):
         a = [[1,2],[3,4],[5,6]]
         id_mtx = [2,0,1]
         expected = [[5,6],[1,2],[3,4]]
-        self.assertArrayEqual(ne.view_nd(a, id_mtx), expected)
-    def test_view_nd_2dim_a_2dim_id(self):
+        self.assertArrayEqual(ne.getitem_nd(a, id_mtx), expected)
+    def test_getitem_nd_2dim_a_2dim_id(self):
         a = [[1,2],[3,4],[5,6]]
         id_mtx = [[0,1,2],[1,2,0],[2,0,1]]
         expected = [
@@ -65,7 +65,32 @@ class TestNumpyExtensions(TestCaseNp):
             [[3,4],[5,6],[1,2]],
             [[5,6],[1,2],[3,4]]
         ]
-        self.assertArrayEqual(ne.view_nd(a, id_mtx), expected)
+        self.assertArrayEqual(ne.getitem_nd(a, id_mtx), expected)
+
+    def test_setitem_nd_1dim_a_1dim_id(self):
+        a = [1,2,3]
+        id_mtx = [2,0,1]
+        values = [3,4,5]
+        expected = [4,5,3]
+        self.assertArrayEqual(ne.setitem_nd(a, id_mtx, values), expected)
+    def test_setitem_nd_1dim_a_2dim_id(self):
+        a = [1,2,3,4]
+        id_mtx = [[0,1],[2,3]]
+        values = [[5,6],[7,8]]
+        expected = [5,6,7,8]
+        self.assertArrayEqual(ne.setitem_nd(a, id_mtx, values), expected)
+    def test_setitem_nd_2dim_a_1dim_id(self):
+        a = [[1,2],[3,4],[5,6]]
+        id_mtx = [0,2]
+        values = [[7,8],[9,0]]
+        expected = [[7,8],[3,4],[9,0]]
+        self.assertArrayEqual(ne.setitem_nd(a, id_mtx, values), expected)
+    def test_setitem_nd_2dim_a_2dim_id(self):
+        a = [[1,2],[3,4],[5,6],[7,8]]
+        id_mtx = [[0,1],[2,3]]
+        values = [[[-1,-2],[-3,-4]], [[-5,-6],[-7,-8]]]
+        expected = [[-1,-2],[-3,-4],[-5,-6],[-7,-8]]
+        self.assertArrayEqual(ne.setitem_nd(a, id_mtx, values), expected)
 
 
 
