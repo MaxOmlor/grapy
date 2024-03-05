@@ -2,6 +2,8 @@
 
 `grapy` is a Python library designed for manipulating and analyzing graphs using NumPy. It provides a collection of tools to work with graphs represented as sets of vertices and edges, offering functionalities to perform operations such as addition and subtraction of vertices or edges, adjacency matrix generation, and more.
 
+This project was created as a little test- and playgorund for my studie in the univerity module 'Graph Theorie'.
+
 ## Features
 
 - **Graph Operations:** Add and remove vertices and edges to/from the graph.
