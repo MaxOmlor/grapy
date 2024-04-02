@@ -5,7 +5,25 @@ from collections.abc import Iterable
 
 
 
+def extend_vector(vector, nd=3):
+    # Wenn die Länge des Vektors bereits 3 oder mehr beträgt, geben Sie ihn einfach zurück
+    if len(vector) >= nd:
+        return vector
+
+    # Auffüllen des Vektors mit Nullen bis zur Länge nd
+    extended_vector = np.zeros(nd)
+    extended_vector[:len(vector)] = vector
+
+    return extended_vector
+extend_vectorized = np.vectorize(extend_vector, signature='(n)->(m)')
+
 class numpy_extensions():
+    @classmethod
+    def extend_nd(a, nd=3):
+        return extend_vector(a, nd)
+    def brodcast_extend_nd(a, nd=3):
+        return extend_vectorized(a, nd)
+
     @classmethod
     def contains(cls, a: np.ndarray, b: np.ndarray) -> np.ndarray:
         if len(np.shape(a)) == 1 and len(np.shape(a)) == 1:
