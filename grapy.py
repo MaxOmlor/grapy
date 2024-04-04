@@ -2,27 +2,21 @@ from __future__ import annotations
 import numpy as np
 #import scipy as sp
 from collections.abc import Iterable
-
-
-
-def extend_vector(vector, nd=3):
-    # Wenn die Länge des Vektors bereits 3 oder mehr beträgt, geben Sie ihn einfach zurück
-    if len(vector) >= nd:
-        return vector
-
-    # Auffüllen des Vektors mit Nullen bis zur Länge nd
-    extended_vector = np.zeros(nd)
-    extended_vector[:len(vector)] = vector
-
-    return extended_vector
-extend_vectorized = np.vectorize(extend_vector, signature='(n)->(m)')
+from sklearn.cluster import KMeans
 
 class numpy_extensions():
     @classmethod
-    def extend_nd(a, nd=3):
-        return extend_vector(a, nd)
-    def brodcast_extend_nd(a, nd=3):
-        return extend_vectorized(a, nd)
+    def extend_nd(cls, a, dim):
+        if len(a) >= dim:
+            return a
+
+        a_extended = np.zeros(dim)
+        a_extended[:len(a)] = a
+
+        return a_extended
+    @classmethod
+    def brodcast_extend_nd(cls, a, dim):
+        return np.apply_along_axis(numpy_extensions.extend_nd, axis=1, arr=a, dim=dim)
 
     @classmethod
     def contains(cls, a: np.ndarray, b: np.ndarray) -> np.ndarray:
@@ -225,6 +219,40 @@ class numpy_extensions():
         result[ids_flatten] = np.reshape(values, shape)
         return result
     
+    @classmethod
+    def spectral_clustering(cls, laplacian_matrix: np.ndarray, k: int) -> np.ndarray:
+        eigenvalues, eigenvectors = np.linalg.eig(laplacian_matrix)
+
+        sorted_ids = np.argsort(eigenvalues)
+        embeddings = eigenvectors[sorted_ids][1:].T
+
+        kmeans = KMeans(n_clusters=k)
+        kmeans.fit(embeddings)
+        cluster_labels = kmeans.labels_
+        return cluster_labels
+    
+    @classmethod
+    def relabel(cls, a: np.ndarray) -> np.ndarray:
+        """
+        assigns ints to every value in a, such that same values in a get the same int starting by 0 for the first value in values.
+        """
+        _, unique_ids = np.unique(a, return_index=True)
+        unique_ids_sorted = np.sort(unique_ids)
+
+        values = a[unique_ids_sorted]
+        replacements = np.arange(len(unique_ids_sorted))
+
+        result = np.copy(a)
+        shape = result.shape
+        result = result.flatten()
+
+        d = dict(zip(values, replacements))
+        def r(x): return d[x]
+
+        mask = np.in1d(result, values)
+        result[mask] = np.frompyfunc(r, 1, 1)(result[mask])
+        result = result.reshape(shape)
+        return result.astype(replacements.dtype)
 
 class grapy():
     class graph():
