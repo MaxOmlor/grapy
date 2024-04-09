@@ -220,13 +220,20 @@ class numpy_extensions():
         return result
     
     @classmethod
-    def spectral_clustering(cls, laplacian_matrix: np.ndarray, k: int) -> np.ndarray:
+    def spectral_clustering(
+        cls,
+        laplacian_matrix: np.ndarray,
+        k_clusters: int,
+        k_eigenvectors: int=None) -> np.ndarray:
+        if k_eigenvectors is None:
+            k_eigenvectors = len(laplacian_matrix)
+
         eigenvalues, eigenvectors = np.linalg.eig(laplacian_matrix)
 
         sorted_ids = np.argsort(eigenvalues)
-        embeddings = eigenvectors[sorted_ids][1:].T
+        embeddings = eigenvectors[sorted_ids][1:k_eigenvectors+1].T
 
-        kmeans = KMeans(n_clusters=k)
+        kmeans = KMeans(n_clusters=k_clusters)
         kmeans.fit(embeddings)
         cluster_labels = kmeans.labels_
         return cluster_labels
